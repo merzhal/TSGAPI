@@ -269,3 +269,37 @@ def wipe():
     save_db(db)
 
     return jsonify({"status":"wiped"})
+
+# -------------------------
+# GENERATE BULK KEYS
+# -------------------------
+@app.route("/generatebulk")
+def generate_bulk():
+
+    admin = request.args.get("admin")
+    amount = int(request.args.get("amount", 1))
+    days = int(request.args.get("days", 30))
+
+    if admin != ADMIN_KEY:
+        return jsonify({"status": "unauthorized"})
+
+    db = load_db()
+    keys = []
+
+    for _ in range(amount):
+        key = generate_key()
+        expire = (datetime.datetime.utcnow() + datetime.timedelta(days=days)).timestamp()
+
+        db["keys"][key] = {
+            "hwid": None,
+            "expires": expire
+        }
+
+        keys.append(key)
+
+    save_db(db)
+
+    return jsonify({
+        "status": "generated",
+        "keys": keys
+    })
