@@ -303,3 +303,22 @@ def generate_bulk():
         "status": "generated",
         "keys": keys
     })
+
+# -------------------------
+# RESET ALL BLACKLISTS
+# -------------------------
+@app.route("/resetblacklists")
+def reset_blacklists():
+
+    admin = request.args.get("admin")
+
+    if admin != ADMIN_KEY:
+        return jsonify({"status": "unauthorized"})
+
+    db = load_db()
+
+    db["blacklist"] = []  # clear all blacklisted HWIDs
+
+    save_db(db)
+
+    return jsonify({"status": "success"})
